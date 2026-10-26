@@ -1,0 +1,51 @@
+<!doctype html>
+<!--
+  StockFlow OAuth relay. eBay (RuName accept/decline URL) and StockX (redirect
+  URI) require an HTTPS redirect, but the app lives on the user's machine. This
+  static page hands the query string (code, state, error…) to the desktop app
+  via its stockflow:// protocol. It never sends the code anywhere else, and the
+  code is useless without the app's client secret and the matching state.
+  Host on any static HTTPS host (GitHub Pages). See README.md in this folder.
+-->
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="referrer" content="no-referrer" />
+  <title>Returning to StockFlow…</title>
+  <style>
+    body { font-family: system-ui, -apple-system, sans-serif; background: #0a0a0b; color: #e8e8ea;
+           display: grid; place-items: center; height: 100vh; margin: 0; text-align: center; }
+    h1 { color: #10b981; font-size: 1.4rem; }
+    a.btn { display: inline-block; margin-top: 1rem; padding: .6rem 1.1rem; border-radius: 8px;
+            background: #10b981; color: #fff; text-decoration: none; font-weight: 600; }
+    p { color: #9a9aa3; max-width: 28rem; }
+    .err h1 { color: #f43f5e; }
+  </style>
+</head>
+<body>
+  <main id="box">
+    <h1>Returning to StockFlow…</h1>
+    <p>If your browser asks, allow it to open StockFlow.</p>
+    <a class="btn" id="open" href="#">Open StockFlow</a>
+    <p>Once StockFlow shows the account as connected, you can close this tab.</p>
+  </main>
+  <script>
+    (function () {
+      var q = window.location.search || ''
+      var params = new URLSearchParams(q)
+      if (!params.get('state')) {
+        var box = document.getElementById('box')
+        box.className = 'err'
+        box.innerHTML = '<h1>Nothing to do here</h1><p>This page is only used while connecting a marketplace account from the StockFlow app. Start from Settings → Platform connections.</p>'
+        return
+      }
+      var target = 'stockflow://oauth/callback' + q
+      document.getElementById('open').setAttribute('href', target)
+      // Strip the code from the address bar/history once we've read it.
+      try { history.replaceState(null, '', window.location.pathname) } catch (e) {}
+      window.location.href = target
+    })()
+  </script>
+</body>
+</html>
